@@ -1,0 +1,26 @@
+{
+  "name": "redis-cluster-learning",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bench:slow": "autocannon -c 1000 -d 60 -m POST -b \"{\\\"data\\\":\\\"test_load\\\"}\" -H \"Content-Type: application/json\" http://localhost:3000/ingest",
+    "bench:redis": "autocannon -c 1000 -d 60 -m POST -b \"{\\\"data\\\":\\\"test_load\\\"}\" -H \"Content-Type: application/json\" http://localhost:3001/ingest",
+    "bench:get-slow": "autocannon -c 100 -d 10 http://localhost:3000/logs",
+    "bench:get-redis": "autocannon -c 100 -d 10 http://localhost:3001/logs",
+    "bench:patch-slow": "autocannon -c 100 -d 10 -m PATCH http://localhost:3000/logs",
+    "bench:patch-redis": "autocannon -c 100 -d 10 -m PATCH http://localhost:3001/logs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "autocannon": "^8.0.0",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "ioredis": "^5.9.2",
+    "mssql": "^12.2.0"
+  }
+}

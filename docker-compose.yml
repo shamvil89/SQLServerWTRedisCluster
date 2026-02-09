@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  # SQL Server (Optional - if you don't use your local one)
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql-demo
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=yourStrong(!)Password
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlvolume:/var/opt/mssql
+
+  # Redis Cluster (All-in-one for testing)
+  redis-cluster:
+    image: grokzen/redis-cluster:latest
+    container_name: redis-cluster-demo
+    environment:
+      - IP=0.0.0.0
+      - INITIAL_PORT=7000
+      - MASTERS=3
+      - SLAVES_PER_MASTER=1
+    ports:
+      - "7000-7005:7000-7005"
+      - "5000-5002:5000-5002" # Bus ports
+    # Disable protected mode so the host can connect to the cluster nodes.
+    # The grokzen image starts Redis via supervisord, so we run a background
+    # loop that waits for the nodes to come up and then turns protected mode off.
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7000", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  sqlvolume:
