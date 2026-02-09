@@ -39,6 +39,44 @@ All commands below are meant to be run in **PowerShell** on Windows.
     ```
     *You need to run this each time the container is recreated.*
 
+5.  **Install Dependencies:**
+    ```powershell
+    npm install
+    ```
+
+## Configuring Benchmarks
+
+All benchmark scripts are defined in `package.json` under `"scripts"`. The key autocannon flags are:
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `-c` | Number of concurrent connections | `-c 100` |
+| `-d` | Duration in seconds | `-d 10` |
+| `-m` | HTTP method | `-m POST`, `-m PATCH` |
+| `-b` | Request body (JSON string) | `-b '{"data":"test_load"}'` |
+| `-H` | Request header | `-H "Content-Type: application/json"` |
+| `-p` | Number of pipelining requests per connection | `-p 10` |
+| `-w` | Number of worker threads | `-w 4` |
+| `-t` | Connection timeout in seconds | `-t 30` |
+| `-R` | Max requests per second (rate limiting) | `-R 5000` |
+| `-a` | Total number of requests to send (instead of duration) | `-a 10000` |
+| `-l` | Print latency table at the end | `-l` |
+| `-j` | Output results as JSON | `-j` |
+| `--on-port` | Start a command when autocannon begins | `--on-port "node server.js"` |
+
+To adjust parameters, edit the scripts in `package.json`. For example, to run with 500 connections for 30 seconds, change `-c 100 -d 10` to `-c 500 -d 30` in the relevant script.
+
+**Available benchmark scripts:**
+
+| Script | Method | Target | Server |
+|--------|--------|--------|--------|
+| `npm run bench:slow` | POST | `/ingest` | Slow (port 3000) |
+| `npm run bench:redis` | POST | `/ingest` | Redis (port 3001) |
+| `npm run bench:get-slow` | GET | `/logs` | Slow (port 3000) |
+| `npm run bench:get-redis` | GET | `/logs` | Redis (port 3001) |
+| `npm run bench:patch-slow` | PATCH | `/logs` | Slow (port 3000) |
+| `npm run bench:patch-redis` | PATCH | `/logs` | Redis (port 3001) |
+
 ## Scenario 1: The Bottleneck (Direct SQL)
 
 In this scenario, the API waits for the SQL INSERT to complete before responding.
@@ -126,5 +164,5 @@ Both servers expose a `PATCH /logs` endpoint that picks a random row and replace
 
 ## Notes
 
-- **Data Persistence:** The `worker.js` ensures data eventually reaches SQL Server.
+- **Data Persistence:** The `worker.js` ensures data eventually reaches SQL Server. It processes both the insert queue (`traffic_queue`) and the update queue (`update_queue`).
 - **Scaling:** Redis Cluster allows you to scale writes horizontally across multiple nodes, whereas a single SQL Server instance eventually hits a hard write limit.
